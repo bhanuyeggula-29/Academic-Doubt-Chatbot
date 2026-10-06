@@ -11,12 +11,25 @@ chunk_pages = []
 pdf_name = ""
 
 
+# -----------------------------
+# TEXT TOKENIZATION
+# -----------------------------
+
 def tokenize(text):
     return re.findall(r'\b[a-zA-Z0-9]+\b', text.lower())
 
 
+# -----------------------------
+# TF-IDF CALCULATION
+# -----------------------------
+
 def calculate_tfidf(documents):
-    tokenized_docs = [tokenize(doc) for doc in documents]
+
+    tokenized_docs = [
+        tokenize(doc)
+        for doc in documents
+    ]
+
     total_documents = len(tokenized_docs)
 
     vocabulary = set()
@@ -27,20 +40,30 @@ def calculate_tfidf(documents):
     tfidf_vectors = []
 
     for words in tokenized_docs:
+
         word_count = Counter(words)
+
         total_words = len(words)
 
         vector = {}
 
         for word in vocabulary:
-            tf = word_count[word] / total_words if total_words > 0 else 0
+
+            tf = (
+                word_count[word] / total_words
+                if total_words > 0
+                else 0
+            )
 
             document_frequency = sum(
-                1 for doc in tokenized_docs if word in doc
+                1
+                for doc in tokenized_docs
+                if word in doc
             )
 
             idf = math.log(
-                (total_documents + 1) /
+                (total_documents + 1)
+                /
                 (document_frequency + 1)
             ) + 1
 
@@ -51,35 +74,69 @@ def calculate_tfidf(documents):
     return tfidf_vectors
 
 
+# -----------------------------
+# COSINE SIMILARITY
+# -----------------------------
+
 def cosine_similarity(vector1, vector2):
 
-    words = set(vector1.keys()) | set(vector2.keys())
+    words = (
+        set(vector1.keys())
+        |
+        set(vector2.keys())
+    )
 
     dot_product = sum(
-        vector1.get(word, 0) * vector2.get(word, 0)
+        vector1.get(word, 0)
+        *
+        vector2.get(word, 0)
         for word in words
     )
 
     magnitude1 = math.sqrt(
-        sum(value ** 2 for value in vector1.values())
+        sum(
+            value ** 2
+            for value in vector1.values()
+        )
     )
 
     magnitude2 = math.sqrt(
-        sum(value ** 2 for value in vector2.values())
+        sum(
+            value ** 2
+            for value in vector2.values()
+        )
     )
 
     if magnitude1 == 0 or magnitude2 == 0:
         return 0
 
-    return dot_product / (magnitude1 * magnitude2)
+    return (
+        dot_product
+        /
+        (magnitude1 * magnitude2)
+    )
 
+
+# -----------------------------
+# HOME PAGE
+# -----------------------------
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+
+    return render_template(
+        "index.html"
+    )
 
 
-@app.route("/upload", methods=["POST"])
+# -----------------------------
+# PDF UPLOAD
+# -----------------------------
+
+@app.route(
+    "/upload",
+    methods=["POST"]
+)
 def upload_pdf():
 
     global chunks
@@ -87,17 +144,21 @@ def upload_pdf():
     global pdf_name
 
     if "file" not in request.files:
+
         return jsonify({
             "success": False,
-            "message": "No PDF file selected."
+            "message":
+            "No PDF file selected."
         })
 
     file = request.files["file"]
 
     if file.filename == "":
+
         return jsonify({
             "success": False,
-            "message": "Please select a PDF."
+            "message":
+            "Please select a PDF."
         })
 
     try:
@@ -105,9 +166,12 @@ def upload_pdf():
         reader = PdfReader(file)
 
         chunks = []
+
         chunk_pages = []
+
         pdf_name = file.filename
 
+        # Read every page
         for page_number, page in enumerate(
             reader.pages,
             start=1
@@ -130,7 +194,11 @@ def upload_pdf():
                     ].strip()
 
                     if chunk:
-                        chunks.append(chunk)
+
+                        chunks.append(
+                            chunk
+                        )
+
                         chunk_pages.append(
                             page_number
                         )
@@ -150,7 +218,8 @@ def upload_pdf():
             "message":
             "PDF uploaded successfully!",
 
-            "file": pdf_name,
+            "file":
+            pdf_name,
 
             "pages":
             len(reader.pages),
@@ -162,18 +231,30 @@ def upload_pdf():
     except Exception as e:
 
         return jsonify({
+
             "success": False,
-            "message": str(e)
+
+            "message":
+            str(e)
         })
 
 
-@app.route("/ask", methods=["POST"])
+# -----------------------------
+# ASK QUESTION
+# -----------------------------
+
+@app.route(
+    "/ask",
+    methods=["POST"]
+)
 def ask_question():
 
     if not chunks:
 
         return jsonify({
+
             "success": False,
+
             "message":
             "Please upload a PDF first."
         })
@@ -185,26 +266,48 @@ def ask_question():
         ""
     ).strip()
 
+    language = data.get(
+        "language",
+        "en"
+    )
+
     if not question:
 
         return jsonify({
+
             "success": False,
+
             "message":
             "Please enter a question."
         })
 
-    documents = chunks + [question]
-
-    tfidf_vectors = calculate_tfidf(
-        documents
+    # Add question to documents
+    documents = (
+        chunks
+        +
+        [question]
     )
 
-    question_vector = tfidf_vectors[-1]
+    # Calculate TF-IDF
+    tfidf_vectors = (
+        calculate_tfidf(
+            documents
+        )
+    )
 
-    chunk_vectors = tfidf_vectors[:-1]
+    # Question vector
+    question_vector = (
+        tfidf_vectors[-1]
+    )
+
+    # PDF chunk vectors
+    chunk_vectors = (
+        tfidf_vectors[:-1]
+    )
 
     similarities = []
 
+    # Calculate similarity
     for chunk_vector in chunk_vectors:
 
         score = cosine_similarity(
@@ -212,8 +315,11 @@ def ask_question():
             chunk_vector
         )
 
-        similarities.append(score)
+        similarities.append(
+            score
+        )
 
+    # Find best matching chunk
     best_index = similarities.index(
         max(similarities)
     )
@@ -222,9 +328,24 @@ def ask_question():
         best_index
     ]
 
+    # -----------------------------
+    # RELEVANT ANSWER
+    # -----------------------------
+
     if best_score >= 0.10:
 
-        answer = chunks[best_index]
+        answer = chunks[
+            best_index
+        ]
+
+        # Telugu + English mode
+        if language == "te":
+
+            answer = (
+                "🇮🇳 Telugu + English Explanation:\n\n"
+                +
+                answer
+            )
 
         page = chunk_pages[
             best_index
@@ -234,11 +355,14 @@ def ask_question():
 
             "success": True,
 
-            "answer": answer,
+            "answer":
+            answer,
 
-            "source": pdf_name,
+            "source":
+            pdf_name,
 
-            "page": page,
+            "page":
+            page,
 
             "score":
             round(
@@ -246,6 +370,10 @@ def ask_question():
                 1
             )
         })
+
+    # -----------------------------
+    # NO RELEVANT ANSWER
+    # -----------------------------
 
     else:
 
@@ -256,13 +384,23 @@ def ask_question():
             "answer":
             "Sorry, relevant information was not found in the uploaded PDF.",
 
-            "source": None,
+            "source":
+            None,
 
-            "page": None,
+            "page":
+            None,
 
-            "score": 0
+            "score":
+            0
         })
 
 
+# -----------------------------
+# RUN FLASK APPLICATION
+# -----------------------------
+
 if __name__ == "__main__":
-    app.run(debug=True)
+
+    app.run(
+        debug=True
+    )

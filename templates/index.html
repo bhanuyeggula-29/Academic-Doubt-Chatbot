@@ -5,9 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>AI Academic Doubt Chatbot</title>
+    <title>AI Academic Doubt-Solving Chatbot</title>
 
     <style>
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -37,8 +38,8 @@
         }
 
         .container {
-            width: 90%;
-            max-width: 850px;
+            width: 92%;
+            max-width: 900px;
             margin: auto;
         }
 
@@ -66,18 +67,28 @@
             margin-top: 15px;
         }
 
-        .question-box {
-            display: flex;
-            gap: 10px;
-        }
-
-        .question-box input {
-            flex: 1;
+        input,
+        select {
             padding: 14px;
             border: 1px solid #cbd5e1;
             border-radius: 10px;
             font-size: 16px;
             outline: none;
+            width: 100%;
+        }
+
+        .question-box {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .question-box input {
+            flex: 1;
+        }
+
+        .question-box select {
+            width: 190px;
         }
 
         button {
@@ -103,7 +114,7 @@
             margin-top: 15px;
             padding: 12px;
             border-radius: 10px;
-            display: none;
+            background: #f1f5f9;
         }
 
         .answer {
@@ -121,6 +132,48 @@
             font-size: 14px;
         }
 
+        .feature-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .feature-row select {
+            flex: 1;
+        }
+
+        .feature-box {
+            margin-top: 18px;
+            padding: 20px;
+            border-radius: 12px;
+            background: #f8fafc;
+            line-height: 1.7;
+        }
+
+        .quiz-option {
+            display: block;
+            width: 100%;
+            text-align: left;
+            margin: 10px 0;
+            background: #6366f1;
+        }
+
+        .quiz-option:hover {
+            background: #4f46e5;
+        }
+
+        .planner-grid,
+        .progress-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .planner-grid input,
+        .progress-grid input {
+            width: 100%;
+        }
+
         .footer {
             text-align: center;
             padding: 25px;
@@ -128,7 +181,13 @@
             font-size: 14px;
         }
 
-        @media (max-width: 600px) {
+        .language-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 700px) {
 
             .header h1 {
                 font-size: 28px;
@@ -136,23 +195,47 @@
 
             .question-box {
                 flex-direction: column;
+                align-items: stretch;
+            }
+
+            .question-box select {
+                width: 100%;
+            }
+
+            .question-box button {
+                width: 100%;
+            }
+
+            .feature-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .planner-grid,
+            .progress-grid {
+                grid-template-columns: 1fr;
             }
 
             button {
                 width: 100%;
             }
         }
+
     </style>
 </head>
 
+
 <body>
+
+
+    <!-- HEADER -->
 
     <div class="header">
 
         <h1>🎓 AI Academic Doubt-Solving Chatbot</h1>
 
         <p>
-            Upload your study material and ask questions from your PDF.
+            Upload your study material and get academic support.
         </p>
 
     </div>
@@ -160,7 +243,8 @@
 
     <div class="container">
 
-        <!-- PDF Upload -->
+
+        <!-- PDF UPLOAD -->
 
         <div class="card">
 
@@ -186,7 +270,8 @@
 
                 <div
                     id="uploadStatus"
-                    class="status">
+                    class="status"
+                    style="display:none;">
                 </div>
 
             </div>
@@ -194,7 +279,8 @@
         </div>
 
 
-        <!-- Question -->
+
+        <!-- ASK DOUBT -->
 
         <div class="card">
 
@@ -205,8 +291,20 @@
                 <input
                     type="text"
                     id="question"
-                    placeholder="Example: What is Java?"
+                    placeholder="Enter your academic question..."
                 >
+
+                <select id="answerLanguage">
+
+                    <option value="en">
+                        English
+                    </option>
+
+                    <option value="te">
+                        Telugu + English
+                    </option>
+
+                </select>
 
                 <button
                     id="askButton"
@@ -221,7 +319,8 @@
         </div>
 
 
-        <!-- Answer -->
+
+        <!-- CHATBOT ANSWER -->
 
         <div class="card">
 
@@ -249,25 +348,224 @@
 
         </div>
 
+
+
+        <!-- QUIZ -->
+
+        <div class="card">
+
+            <h2>📝 Quiz / Practice Questions</h2>
+
+            <div class="feature-row">
+
+                <select id="quizSubject">
+
+                    <option value="Java">
+                        Java
+                    </option>
+
+                    <option value="Python">
+                        Python
+                    </option>
+
+                    <option value="DBMS">
+                        DBMS
+                    </option>
+
+                </select>
+
+                <button
+                    type="button"
+                    onclick="startQuiz()">
+
+                    ▶ Start Quiz
+
+                </button>
+
+            </div>
+
+
+            <div
+                id="quizBox"
+                class="feature-box">
+
+                Select a subject and start the quiz.
+
+            </div>
+
+
+            <button
+                type="button"
+                id="nextQuizBtn"
+                onclick="nextQuiz()"
+                style="display:none; margin-top:15px;">
+
+                Next Question
+
+            </button>
+
+        </div>
+
+
+
+        <!-- STUDY PLANNER -->
+
+        <div class="card">
+
+            <h2>📅 Study Planner</h2>
+
+            <div class="planner-grid">
+
+                <input
+                    id="studySubjects"
+                    placeholder="Subjects: Java, Python, DBMS"
+                >
+
+                <input
+                    id="studyHours"
+                    type="number"
+                    min="1"
+                    placeholder="Hours per day"
+                >
+
+                <input
+                    id="startTime"
+                    type="time"
+                    value="06:00"
+                >
+
+                <input
+                    id="examDate"
+                    type="date"
+                >
+
+            </div>
+
+            <br>
+
+            <button onclick="createPlan()">
+
+                ✨ Create Study Plan
+
+            </button>
+
+
+            <div
+                id="planResult"
+                class="feature-box">
+
+                Your study plan will appear here.
+
+            </div>
+
+        </div>
+
+
+
+        <!-- PROGRESS TRACKER -->
+
+        <div class="card">
+
+            <h2>📊 Student Progress Tracker</h2>
+
+            <div class="progress-grid">
+
+                <input
+                    id="progressSubject"
+                    placeholder="Subject"
+                >
+
+                <input
+                    id="progressScore"
+                    type="number"
+                    min="0"
+                    max="100"
+                    placeholder="Score %"
+                >
+
+            </div>
+
+            <br>
+
+            <button onclick="addProgress()">
+
+                ➕ Add Score
+
+            </button>
+
+
+            <div
+                id="progressResult"
+                class="feature-box">
+
+                No progress recorded yet.
+
+            </div>
+
+        </div>
+
+
+
+        <!-- LANGUAGE SUPPORT -->
+
+        <div class="card">
+
+            <h2>🌐 Language Support</h2>
+
+            <div class="language-buttons">
+
+                <button
+                    onclick="setLanguage('en')">
+
+                    🇬🇧 English
+
+                </button>
+
+                <button
+                    onclick="setLanguage('te')">
+
+                    🇮🇳 తెలుగు
+
+                </button>
+
+            </div>
+
+
+            <div
+                id="languageMessage"
+                class="feature-box">
+
+                English mode selected.
+
+            </div>
+
+        </div>
+
+
     </div>
 
+
+
+    <!-- FOOTER -->
 
     <div class="footer">
 
         🎓 AI Academic Doubt-Solving Chatbot
+
         <br>
+
         TF-IDF Based Academic Retrieval System
 
     </div>
 
 
-    <!-- JavaScript -->
 
     <script>
 
-        // --------------------------------
-        // Upload PDF
-        // --------------------------------
+
+        // =========================================
+        // PDF UPLOAD
+        // =========================================
 
         async function uploadPDF() {
 
@@ -276,6 +574,7 @@
 
             const status =
                 document.getElementById("uploadStatus");
+
 
             if (!fileInput.files.length) {
 
@@ -287,6 +586,7 @@
                 return;
             }
 
+
             const formData =
                 new FormData();
 
@@ -295,10 +595,12 @@
                 fileInput.files[0]
             );
 
+
             status.style.display = "block";
 
             status.innerHTML =
                 "⏳ Processing PDF...";
+
 
             try {
 
@@ -311,53 +613,72 @@
                         }
                     );
 
+
                 const data =
                     await response.json();
+
 
                 if (data.success) {
 
                     status.innerHTML =
-                        "✅ " + data.message +
-                        "<br>📄 " + data.file +
+                        "✅ " +
+                        data.message +
+                        "<br>📄 " +
+                        data.file +
                         "<br>📑 Pages: " +
                         data.pages +
                         " | 🧩 Chunks: " +
                         data.chunks;
 
-                } else {
-
-                    status.innerHTML =
-                        "❌ " + data.message;
                 }
 
-            } catch (error) {
+                else {
+
+                    status.innerHTML =
+                        "❌ " +
+                        data.message;
+
+                }
+
+            }
+
+            catch (error) {
 
                 status.innerHTML =
                     "❌ Could not connect to server.";
+
             }
+
         }
 
 
-        // --------------------------------
-        // Ask Question
-        // --------------------------------
+
+        // =========================================
+        // ASK QUESTION
+        // =========================================
 
         async function askQuestion() {
 
             const question =
-                document.getElementById(
-                    "question"
-                ).value.trim();
+                document
+                    .getElementById("question")
+                    .value
+                    .trim();
+
+
+            const language =
+                document
+                    .getElementById("answerLanguage")
+                    .value;
+
 
             const answer =
-                document.getElementById(
-                    "answer"
-                );
+                document.getElementById("answer");
+
 
             const source =
-                document.getElementById(
-                    "source"
-                );
+                document.getElementById("source");
+
 
             if (!question) {
 
@@ -367,10 +688,13 @@
                 return;
             }
 
+
             answer.innerHTML =
                 "⏳ Searching your academic PDF...";
 
+
             source.innerHTML = "";
+
 
             try {
 
@@ -378,6 +702,7 @@
                     await fetch(
                         "/ask",
                         {
+
                             method: "POST",
 
                             headers: {
@@ -385,19 +710,30 @@
                                     "application/json"
                             },
 
-                            body: JSON.stringify({
-                                question: question
-                            })
+                            body:
+                                JSON.stringify({
+
+                                    question:
+                                        question,
+
+                                    language:
+                                        language
+
+                                })
+
                         }
                     );
 
+
                 const data =
                     await response.json();
+
 
                 if (data.success) {
 
                     answer.innerHTML =
                         data.answer;
+
 
                     if (data.source) {
 
@@ -405,38 +741,50 @@
                             "📚 Source: " +
                             data.source +
                             " &nbsp;&nbsp; " +
+
                             "📑 Page: " +
                             data.page +
                             " &nbsp;&nbsp; " +
+
                             "🎯 Match Score: " +
                             data.score +
                             "%";
 
-                    } else {
+                    }
+
+                    else {
 
                         source.innerHTML =
                             "❌ No relevant source found.";
 
                     }
 
-                } else {
+                }
+
+                else {
 
                     answer.innerHTML =
-                        "⚠️ " + data.message;
+                        "⚠️ " +
+                        data.message;
 
                 }
 
-            } catch (error) {
+            }
+
+            catch (error) {
 
                 answer.innerHTML =
                     "❌ Could not connect to server.";
+
             }
+
         }
 
 
-        // --------------------------------
-        // Enter Key Support
-        // --------------------------------
+
+        // =========================================
+        // ENTER KEY
+        // =========================================
 
         document
             .getElementById("question")
@@ -452,6 +800,976 @@
 
                 }
             );
+
+
+
+        // =========================================
+        // QUIZ DATA
+        // =========================================
+
+        const quizData = {
+
+            Java: [
+
+                {
+                    question:
+                        "Which keyword is used to create a class in Java?",
+
+                    options: [
+                        "class",
+                        "define",
+                        "struct",
+                        "object"
+                    ],
+
+                    answer: 0
+                },
+
+                {
+                    question:
+                        "Which method is the starting point of a Java program?",
+
+                    options: [
+                        "start()",
+                        "main()",
+                        "run()",
+                        "begin()"
+                    ],
+
+                    answer: 1
+                },
+
+                {
+                    question:
+                        "Which language is Java mainly known for?",
+
+                    options: [
+                        "Object-Oriented Programming",
+                        "Only procedural programming",
+                        "Only database programming",
+                        "None"
+                    ],
+
+                    answer: 0
+                }
+
+            ],
+
+
+            Python: [
+
+                {
+                    question:
+                        "Which symbol is used for comments in Python?",
+
+                    options: [
+                        "#",
+                        "//",
+                        "/* */",
+                        "<!-- -->"
+                    ],
+
+                    answer: 0
+                },
+
+                {
+                    question:
+                        "Which function is used to display output in Python?",
+
+                    options: [
+                        "display()",
+                        "print()",
+                        "show()",
+                        "output()"
+                    ],
+
+                    answer: 1
+                },
+
+                {
+                    question:
+                        "Which keyword is used to define a function?",
+
+                    options: [
+                        "function",
+                        "define",
+                        "def",
+                        "fun"
+                    ],
+
+                    answer: 2
+                }
+
+            ],
+
+
+            DBMS: [
+
+                {
+                    question:
+                        "What does DBMS stand for?",
+
+                    options: [
+                        "Database Management System",
+                        "Data Backup Management System",
+                        "Database Machine System",
+                        "Data Management Software"
+                    ],
+
+                    answer: 0
+                },
+
+                {
+                    question:
+                        "Which command is used to retrieve data from a table?",
+
+                    options: [
+                        "INSERT",
+                        "UPDATE",
+                        "SELECT",
+                        "DELETE"
+                    ],
+
+                    answer: 2
+                },
+
+                {
+                    question:
+                        "Which key uniquely identifies a record?",
+
+                    options: [
+                        "Foreign Key",
+                        "Primary Key",
+                        "Candidate Key",
+                        "Normal Key"
+                    ],
+
+                    answer: 1
+                }
+
+            ]
+
+        };
+
+
+        let currentQuiz = [];
+
+        let currentQuizIndex = 0;
+
+        let quizScore = 0;
+
+
+
+        // =========================================
+        // START QUIZ
+        // =========================================
+
+        window.startQuiz = function() {
+
+            const subject =
+                document
+                    .getElementById("quizSubject")
+                    .value;
+
+
+            currentQuiz =
+                quizData[subject];
+
+
+            currentQuizIndex = 0;
+
+            quizScore = 0;
+
+
+            showQuizQuestion();
+
+        };
+
+
+
+        // =========================================
+        // SHOW QUIZ QUESTION
+        // =========================================
+
+        function showQuizQuestion() {
+
+            const quizBox =
+                document.getElementById("quizBox");
+
+
+            const nextButton =
+                document.getElementById("nextQuizBtn");
+
+
+            const q =
+                currentQuiz[currentQuizIndex];
+
+
+            let html =
+
+                "<strong>Question " +
+                (currentQuizIndex + 1) +
+                " of " +
+                currentQuiz.length +
+                "</strong><br><br>" +
+
+                "<strong>" +
+                q.question +
+                "</strong><br><br>";
+
+
+            q.options.forEach(
+                function(option, index) {
+
+                    html +=
+
+                        "<button " +
+                        "class='quiz-option' " +
+                        "onclick='selectAnswer(" +
+                        index +
+                        ")'>" +
+
+                        option +
+
+                        "</button>";
+
+                }
+            );
+
+
+            quizBox.innerHTML = html;
+
+            nextButton.style.display =
+                "none";
+
+        }
+
+
+
+        // =========================================
+        // SELECT ANSWER
+        // =========================================
+
+        window.selectAnswer = function(index) {
+
+            const q =
+                currentQuiz[currentQuizIndex];
+
+
+            const buttons =
+                document.querySelectorAll(
+                    ".quiz-option"
+                );
+
+
+            buttons.forEach(
+                function(button) {
+
+                    button.disabled = true;
+
+                }
+            );
+
+
+            if (index === q.answer) {
+
+                quizScore++;
+
+                document
+                    .getElementById("quizBox")
+                    .innerHTML +=
+                    "<br>✅ Correct Answer!";
+
+            }
+
+            else {
+
+                document
+                    .getElementById("quizBox")
+                    .innerHTML +=
+
+                    "<br>❌ Incorrect." +
+                    "<br>Correct answer: " +
+                    q.options[q.answer];
+
+            }
+
+
+            document
+                .getElementById("nextQuizBtn")
+                .style.display =
+                "block";
+
+        };
+
+
+
+        // =========================================
+        // NEXT QUIZ
+        // =========================================
+
+        window.nextQuiz = function() {
+
+            currentQuizIndex++;
+
+
+            if (
+                currentQuizIndex <
+                currentQuiz.length
+            ) {
+
+                showQuizQuestion();
+
+            }
+
+            else {
+
+                const percentage =
+                    Math.round(
+                        (
+                            quizScore /
+                            currentQuiz.length
+                        ) * 100
+                    );
+
+
+                const subject =
+                    document
+                        .getElementById("quizSubject")
+                        .value;
+
+
+                document
+                    .getElementById("quizBox")
+                    .innerHTML =
+
+                    "<strong>🎉 Quiz Completed!</strong>" +
+
+                    "<br><br>" +
+
+                    "📘 Subject: " +
+                    subject +
+
+                    "<br>" +
+
+                    "✅ Correct Answers: " +
+                    quizScore +
+                    "/" +
+                    currentQuiz.length +
+
+                    "<br>" +
+
+                    "🎯 Score: " +
+                    percentage +
+                    "%";
+
+
+                document
+                    .getElementById("nextQuizBtn")
+                    .style.display =
+                    "none";
+
+
+                saveQuizProgress(
+                    subject,
+                    percentage
+                );
+
+            }
+
+        };
+
+
+
+        // =========================================
+        // SAVE QUIZ SCORE
+        // =========================================
+
+        function saveQuizProgress(
+            subject,
+            score
+        ) {
+
+            let progressData =
+                JSON.parse(
+                    localStorage.getItem(
+                        "academicProgress"
+                    ) || "[]"
+                );
+
+
+            progressData.push({
+
+                subject:
+                    subject,
+
+                score:
+                    score
+
+            });
+
+
+            localStorage.setItem(
+                "academicProgress",
+                JSON.stringify(
+                    progressData
+                )
+            );
+
+
+            showProgress();
+
+        }
+
+
+
+        // =========================================
+        // STUDY PLANNER
+        // =========================================
+
+        window.createPlan = function() {
+
+            const subjects =
+                document
+                    .getElementById("studySubjects")
+                    .value
+                    .split(",")
+                    .map(
+                        s => s.trim()
+                    )
+                    .filter(Boolean);
+
+
+            const hours =
+                Number(
+                    document
+                        .getElementById("studyHours")
+                        .value
+                );
+
+
+            const startTime =
+                document
+                    .getElementById("startTime")
+                    .value;
+
+
+            const examDate =
+                document
+                    .getElementById("examDate")
+                    .value;
+
+
+            const result =
+                document
+                    .getElementById("planResult");
+
+
+            if (!subjects.length) {
+
+                result.innerHTML =
+                    "⚠️ Please enter your subjects.";
+
+                return;
+
+            }
+
+
+            if (!hours || hours <= 0) {
+
+                result.innerHTML =
+                    "⚠️ Please enter study hours.";
+
+                return;
+
+            }
+
+
+            if (!startTime) {
+
+                result.innerHTML =
+                    "⚠️ Please select a starting time.";
+
+                return;
+
+            }
+
+
+            const totalMinutes =
+                hours * 60;
+
+
+            const subjectMinutes =
+                Math.floor(
+                    totalMinutes /
+                    subjects.length
+                );
+
+
+            let [hour, minute] =
+                startTime
+                    .split(":")
+                    .map(Number);
+
+
+            function formatTime(
+                h,
+                m
+            ) {
+
+                const total =
+                    h * 60 + m;
+
+
+                let finalHour =
+                    Math.floor(
+                        total / 60
+                    ) % 24;
+
+
+                let finalMinute =
+                    total % 60;
+
+
+                const period =
+                    finalHour >= 12
+                        ? "PM"
+                        : "AM";
+
+
+                let displayHour =
+                    finalHour % 12;
+
+
+                if (
+                    displayHour === 0
+                ) {
+
+                    displayHour = 12;
+
+                }
+
+
+                return (
+
+                    String(displayHour)
+                        .padStart(2, "0") +
+
+                    ":" +
+
+                    String(finalMinute)
+                        .padStart(2, "0") +
+
+                    " " +
+
+                    period
+
+                );
+
+            }
+
+
+            let plan =
+                "<strong>📅 Your Daily Study Schedule</strong><br><br>";
+
+
+            subjects.forEach(
+                function(subject, index) {
+
+                    const start =
+                        formatTime(
+                            hour,
+                            minute
+                        );
+
+
+                    const endMinutes =
+                        hour * 60 +
+                        minute +
+                        subjectMinutes;
+
+
+                    const endHour =
+                        Math.floor(
+                            endMinutes / 60
+                        );
+
+
+                    const endMinute =
+                        endMinutes % 60;
+
+
+                    const end =
+                        formatTime(
+                            endHour,
+                            endMinute
+                        );
+
+
+                    plan +=
+
+                        "📘 <strong>" +
+                        start +
+                        " – " +
+                        end +
+                        "</strong><br>" +
+
+                        "&nbsp;&nbsp;&nbsp;" +
+                        subject +
+                        "<br><br>";
+
+
+                    hour =
+                        endHour;
+
+                    minute =
+                        endMinute;
+
+
+                    if (
+                        index <
+                        subjects.length - 1
+                    ) {
+
+                        const breakStart =
+                            formatTime(
+                                hour,
+                                minute
+                            );
+
+
+                        const breakEndMinutes =
+                            hour * 60 +
+                            minute +
+                            15;
+
+
+                        const breakEndHour =
+                            Math.floor(
+                                breakEndMinutes /
+                                60
+                            );
+
+
+                        const breakEndMinute =
+                            breakEndMinutes %
+                            60;
+
+
+                        const breakEnd =
+                            formatTime(
+                                breakEndHour,
+                                breakEndMinute
+                            );
+
+
+                        plan +=
+
+                            "☕ <strong>" +
+                            breakStart +
+                            " – " +
+                            breakEnd +
+                            " : Break</strong><br><br>";
+
+
+                        hour =
+                            breakEndHour;
+
+                        minute =
+                            breakEndMinute;
+
+                    }
+
+                }
+            );
+
+
+            if (examDate) {
+
+                plan +=
+
+                    "🎯 <strong>Exam Date:</strong> " +
+                    examDate +
+                    "<br><br>";
+
+            }
+
+
+            plan +=
+
+                "💡 Stay consistent and revise regularly.";
+
+
+            result.innerHTML =
+                plan;
+
+        };
+
+
+
+        // =========================================
+        // PROGRESS TRACKER
+        // =========================================
+
+        window.addProgress = function() {
+
+            const subject =
+                document
+                    .getElementById(
+                        "progressSubject"
+                    )
+                    .value
+                    .trim();
+
+
+            const score =
+                Number(
+                    document
+                        .getElementById(
+                            "progressScore"
+                        )
+                        .value
+                );
+
+
+            const result =
+                document
+                    .getElementById(
+                        "progressResult"
+                    );
+
+
+            if (!subject) {
+
+                result.innerHTML =
+                    "⚠️ Please enter a subject.";
+
+                return;
+
+            }
+
+
+            if (
+                isNaN(score) ||
+                score < 0 ||
+                score > 100
+            ) {
+
+                result.innerHTML =
+                    "⚠️ Please enter a score between 0 and 100.";
+
+                return;
+
+            }
+
+
+            let progressData =
+                JSON.parse(
+                    localStorage.getItem(
+                        "academicProgress"
+                    ) || "[]"
+                );
+
+
+            progressData.push({
+
+                subject:
+                    subject,
+
+                score:
+                    score
+
+            });
+
+
+            localStorage.setItem(
+                "academicProgress",
+                JSON.stringify(
+                    progressData
+                )
+            );
+
+
+            document
+                .getElementById(
+                    "progressSubject"
+                )
+                .value = "";
+
+
+            document
+                .getElementById(
+                    "progressScore"
+                )
+                .value = "";
+
+
+            showProgress();
+
+        };
+
+
+
+        // =========================================
+        // SHOW PROGRESS
+        // =========================================
+
+        window.showProgress = function() {
+
+            const result =
+                document
+                    .getElementById(
+                        "progressResult"
+                    );
+
+
+            const progressData =
+                JSON.parse(
+                    localStorage.getItem(
+                        "academicProgress"
+                    ) || "[]"
+                );
+
+
+            if (
+                progressData.length === 0
+            ) {
+
+                result.innerHTML =
+                    "No progress recorded yet.";
+
+                return;
+
+            }
+
+
+            let html =
+
+                "<strong>📊 Your Progress</strong>" +
+                "<br><br>";
+
+
+            progressData.forEach(
+                function(item) {
+
+                    html +=
+
+                        "📘 <strong>" +
+                        item.subject +
+                        "</strong> — " +
+                        item.score +
+                        "%<br>";
+
+                }
+            );
+
+
+            const total =
+                progressData.reduce(
+                    function(
+                        sum,
+                        item
+                    ) {
+
+                        return (
+                            sum +
+                            Number(
+                                item.score
+                            )
+                        );
+
+                    },
+                    0
+                );
+
+
+            const average =
+                Math.round(
+                    total /
+                    progressData.length
+                );
+
+
+            html +=
+
+                "<br>🎯 <strong>Overall Average: " +
+                average +
+                "%</strong>";
+
+
+            result.innerHTML =
+                html;
+
+        };
+
+
+
+        // =========================================
+        // LANGUAGE SUPPORT
+        // =========================================
+
+        window.setLanguage = function(
+            language
+        ) {
+
+            const message =
+                document
+                    .getElementById(
+                        "languageMessage"
+                    );
+
+
+            const languageSelect =
+                document
+                    .getElementById(
+                        "answerLanguage"
+                    );
+
+
+            if (
+                language === "te"
+            ) {
+
+                languageSelect.value =
+                    "te";
+
+
+                message.innerHTML =
+
+                    "🇮🇳 <strong>తెలుగు + English Mode Selected</strong>" +
+
+                    "<br><br>" +
+
+                    "మీ academic doubts ని PDF upload చేసి అడగవచ్చు.";
+
+            }
+
+            else {
+
+                languageSelect.value =
+                    "en";
+
+
+                message.innerHTML =
+
+                    "🇬🇧 <strong>English Mode Selected</strong>" +
+
+                    "<br><br>" +
+
+                    "You can upload your academic PDF and ask questions.";
+
+            }
+
+        };
+
+
+
+        // =========================================
+        // LOAD SAVED PROGRESS
+        // =========================================
+
+        showProgress();
+
 
     </script>
 
